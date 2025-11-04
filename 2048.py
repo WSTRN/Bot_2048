@@ -48,14 +48,14 @@ class Game_2048:
             self.rows = rows
             self.cols = cols
             self.outline_thickness = 10
-            self.rect_width = 200
-            self.rect_height = 200
+            self.rect_width = 100
+            self.rect_height = 100
             self.width = (
                 self.rect_width + self.outline_thickness
-            ) * cols - 3 * self.outline_thickness
+            ) * cols - (cols - 1) * self.outline_thickness
             self.height = (
                 self.rect_height + self.outline_thickness
-            ) * rows - 3 * self.outline_thickness
+            ) * rows - (rows - 1) * self.outline_thickness
             self.outline_color = (187, 173, 160)
             self.background_color = (205, 192, 180)
             self.font_color = (119, 110, 101)
@@ -63,7 +63,7 @@ class Game_2048:
             pygame.init()
             self.window = pygame.display.set_mode((self.width, self.height))
             pygame.display.set_caption("2048 Game")
-            self.font = pygame.font.SysFont("comicsans", 60, bold=True)
+            self.font = pygame.font.SysFont("comicsans", 30, bold=True)
             self.update_tiles(state)
             pygame.display.update()
 
@@ -85,7 +85,7 @@ class Game_2048:
                     self.window,
                     self.outline_color,
                     (x, 0),
-                    (x, self.width),
+                    (x, self.height),
                     self.outline_thickness,
                 )
             pygame.draw.rect(
@@ -163,10 +163,10 @@ class Game_2048:
                     ),
                 )
 
-    def __init__(self, graphics=True):
+    def __init__(self, rows, cols, graphics=True):
         logging.info("Game starting...")
-        self.rows = 4
-        self.cols = 4
+        self.rows = rows
+        self.cols = cols
         self.state = tuple(tuple(0 for _ in range(self.cols)) for _ in range(self.rows))
         self.state = self.generate_tile()
         # self.state = (
@@ -266,7 +266,7 @@ class Game_2048:
 
 if __name__ == "__main__":
     run = True
-    game = Game_2048()
+    game = Game_2048(4, 4)
 
     while run:
         for event in pygame.event.get():
@@ -283,6 +283,7 @@ if __name__ == "__main__":
                 elif event.key == pygame.K_LEFT:
                     run = game.next_state(Direction.LEFT)
                 game.graphics.update_tiles(game.state)
+    logging.info("Press SPACE to exit.")
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
