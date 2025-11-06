@@ -253,15 +253,25 @@ class Game_2048:
                     state[r][c] = new_col[r]
                 moved_any = moved_any or moved
         else:
-            return True
+            return True, self.state
         if not moved_any:
             if not self.can_move():
                 logging.info("game over")
-                return False
-            return True
+                return False, self.state
+            return True, self.state
         self.state = tuple(tuple(row) for row in state)
         self.state = self.generate_tile()
-        return True
+        return True, self.state
+
+    def get_state(self):
+        return self.state
+    
+    def reset(self):
+        self.state = tuple(tuple(0 for _ in range(self.cols)) for _ in range(self.rows))
+        self.state = self.generate_tile()
+    
+    def get_highest_tile(self):
+        return max(max(row) for row in self.state)
 
 
 if __name__ == "__main__":
@@ -275,14 +285,15 @@ if __name__ == "__main__":
                 exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
-                    run = game.next_state(Direction.UP)
+                    run, _ = game.next_state(Direction.UP)
                 elif event.key == pygame.K_DOWN:
-                    run = game.next_state(Direction.DOWN)
+                    run, _ = game.next_state(Direction.DOWN)
                 elif event.key == pygame.K_RIGHT:
-                    run = game.next_state(Direction.RIGHT)
+                    run, _ = game.next_state(Direction.RIGHT)
                 elif event.key == pygame.K_LEFT:
-                    run = game.next_state(Direction.LEFT)
+                    run, _ = game.next_state(Direction.LEFT)
                 game.graphics.update_tiles(game.state)
+    logging.info(f"Game over! Highest tile: {2**game.get_highest_tile()}")
     logging.info("Press SPACE to exit.")
     while True:
         for event in pygame.event.get():
