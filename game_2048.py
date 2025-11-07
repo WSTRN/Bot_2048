@@ -1,14 +1,7 @@
 import logging
-import math
 import random
 from enum import Enum
-
 import pygame
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="[%(levelname)s]: %(message)s",
-)
 
 
 class Direction(Enum):
@@ -16,7 +9,6 @@ class Direction(Enum):
     DOWN = 1
     LEFT = 2
     RIGHT = 3
-
 
 COLOR = [
     (237, 229, 218),  # 2
@@ -40,7 +32,6 @@ COLOR = [
     (115, 0, 230),  # 524288
     (90, 0, 200),  # 1048576
 ]
-
 
 class Game_2048:
     class Graphics:
@@ -163,18 +154,18 @@ class Game_2048:
                     ),
                 )
 
-    def __init__(self, rows, cols, graphics=True):
+    def __init__(self, rows, cols, graphics=False, verbose=0):
+        if verbose == 0:
+            logging.basicConfig(level=logging.WARNING, format="[%(levelname)s]: %(message)s")
+        elif verbose == 1:
+            logging.basicConfig(level=logging.INFO, format="[%(levelname)s]: %(message)s")
+        else:
+            logging.basicConfig(level=logging.DEBUG, format="[%(levelname)s]: %(message)s")
         logging.info("Game starting...")
         self.rows = rows
         self.cols = cols
         self.state = tuple(tuple(0 for _ in range(self.cols)) for _ in range(self.rows))
         self.state = self.generate_tile()
-        # self.state = (
-        #     (2, 4, 8, 16),
-        #     (32, 64, 128, 256),
-        #     (512, 1024, 2048, 4096),
-        #     (8192, 16384, 32768, 65536),
-        # )
         logging.debug(f"Initial game state: {self.state}")
 
         if graphics:
@@ -256,7 +247,6 @@ class Game_2048:
             return True, self.state
         if not moved_any:
             if not self.can_move():
-                logging.info("game over")
                 return False, self.state
             return True, self.state
         self.state = tuple(tuple(row) for row in state)
@@ -265,18 +255,19 @@ class Game_2048:
 
     def get_state(self):
         return self.state
-    
+
     def reset(self):
         self.state = tuple(tuple(0 for _ in range(self.cols)) for _ in range(self.rows))
         self.state = self.generate_tile()
-    
+        return self.state
+
     def get_highest_tile(self):
         return max(max(row) for row in self.state)
 
 
 if __name__ == "__main__":
     run = True
-    game = Game_2048(4, 4)
+    game = Game_2048(4, 4, graphics=True, verbose=1)
 
     while run:
         for event in pygame.event.get():
