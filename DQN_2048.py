@@ -187,7 +187,7 @@ class RewardLossCallback(BaseCallback):
 def train_and_save_model():
     env = game_2048_env(4, 4)
     env = StepLimitWrapper(env, max_steps=1500)
-    eval_env = Monitor(StepLimitWrapper(game_2048_env(4, 4), max_steps=1000))
+    eval_env = Monitor(env)
 
     model = DQN(
         DuelingDQNPolicy,
