@@ -12,6 +12,7 @@ import numpy as np
 from stable_baselines3.common.callbacks import BaseCallback
 import matplotlib.pyplot as plt
 from stable_baselines3.common.vec_env import DummyVecEnv
+from stable_baselines3.common.monitor import Monitor
 
 
 class game_2048_env(gym.Env):
@@ -175,20 +176,25 @@ class RewardLossCallback(BaseCallback):
         self.losses = []
 
     def _on_step(self) -> bool:
-        # reward: episode reward
-        if len(self.locals["infos"]) > 0:
-            info = self.locals["infos"][0]
-            if "episode" in info:
-                ep_reward = info["episode"]["r"]
-                self.rewards.append(ep_reward)
+        infos = self.locals.get("infos", [])
+        for info in infos:
+            ep_info = info.get("episode")
+            if ep_info is not None:
+                self.rewards.append(ep_info["r"])
         return True
 
 def train_and_save_model():
     env = game_2048_env(4, 4)
     env = StepLimitWrapper(env, max_steps=1000)
-    def make_env():
-        return StepLimitWrapper(game_2048_env(4,4), max_steps=1000)
-    vec_env = DummyVecEnv([make_env for _ in range(8)])
+    def make_env(seed):
+        def _init():
+            env = StepLimitWrapper(game_2048_env(4,4), max_steps=1000)
+            env.reset(seed=seed)
+            env = Monitor(env)
+            return env
+        return _init
+    vec_env = DummyVecEnv([make_env(i) for i in range(8)])
+
     model = DQN(
         DuelingDQNPolicy,
         vec_env,
@@ -251,6 +257,5 @@ def evaluate_model():
 
 if __name__ == "__main__":
     train_and_save_model()
-    evaluate_model()
 
 
