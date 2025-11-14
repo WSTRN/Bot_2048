@@ -1,6 +1,5 @@
-import time
 import pygame
-from game_2048 import Game_2048, Direction
+from game_2048 import Direction
 from DQN_2048 import game_2048_env
 from stable_baselines3 import DQN
 
@@ -33,7 +32,7 @@ def evaluate_model():
 
         step += 1
         print(f"Step: {step}, Action: {direction[action]}, Reward: {reward}")
-        time.sleep(0.1)
+        pygame.time.Clock().tick(10)
 
 
 if __name__ == "__main__":

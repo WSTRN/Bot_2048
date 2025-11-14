@@ -52,6 +52,7 @@ class Game_2048:
             self.font_color = (119, 110, 101)
             self.fps = 60
             pygame.init()
+            self.clock = pygame.time.Clock()
             self.window = pygame.display.set_mode((self.width, self.height))
             pygame.display.set_caption("2048 Game")
             self.font = pygame.font.SysFont("comicsans", 30, bold=True)
@@ -293,6 +294,7 @@ if __name__ == "__main__":
                     run, _, merged_new_tiles = game.next_state(Direction.LEFT)
                 game.graphics.update_tiles(game.state)
                 logging.debug(f"Merged new tiles: {merged_new_tiles}")
+        game.graphics.clock.tick(game.graphics.fps)
     logging.info(f"Game over! Highest tile: {2**game.get_highest_tile()}")
     logging.info("Press SPACE to exit.")
     while True:
