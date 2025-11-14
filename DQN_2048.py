@@ -226,34 +226,6 @@ def train_and_save_model():
     plt.title("Average Reward per Episode")
     plt.grid()
     plt.show()
-    
-def evaluate_model():
-    direction = [
-            Direction.UP,
-            Direction.DOWN,
-            Direction.LEFT,
-            Direction.RIGHT,
-        ]
-    env = game_2048_env(4, 4, render=True)
-    model = DQN.load("dqn_2048_model")
-    obs, _ = env.reset()
-    step = 0
-    while True:
-        action, _ = model.predict(obs, deterministic=False)
-        obs, reward, terminated, _, _ = env.step(action)
-        env.render()
-
-        if terminated:
-            print("Game Over!")
-            obs, _ = env.reset()
-            step = 0
-            continue
-
-
-        step += 1
-        print(f"Step: {step}, Action: {direction[action]}, Reward: {reward}")
-        time.sleep(0.1)
-
 
 if __name__ == "__main__":
     train_and_save_model()
