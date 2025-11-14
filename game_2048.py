@@ -201,57 +201,64 @@ class Game_2048:
         original = list(line)
         tiles = [v for v in original if v != 0]
         merged = []
+        new_tile = []
         i = 0
         while i < len(tiles):
             if i + 1 < len(tiles) and tiles[i] == tiles[i + 1]:
                 merged.append(tiles[i] + 1)
+                new_tile.append(tiles[i] + 1)
                 i += 2
             else:
                 merged.append(tiles[i])
                 i += 1
         merged += [0] * (len(original) - len(merged))
         moved = merged != original
-        return merged, moved
+        return merged, moved, new_tile
 
     def next_state(self, direction):
         logging.debug(f"Moving tiles {direction}")
         state = [list(row) for row in self.state]
+        new_tiles = []
         moved_any = False
         if direction == Direction.LEFT:
             for r in range(self.rows):
-                new_row, moved = self.merge_tiles_left(state[r])
+                new_row, moved, new_tile = self.merge_tiles_left(state[r])
                 state[r] = new_row
                 moved_any = moved_any or moved
+                new_tiles.extend(new_tile)
         elif direction == Direction.RIGHT:
             for r in range(self.rows):
                 rev = state[r][::-1]
-                new_rev, moved = self.merge_tiles_left(rev)
+                new_rev, moved, new_tile = self.merge_tiles_left(rev)
                 state[r] = new_rev[::-1]
                 moved_any = moved_any or moved
+                new_tiles.extend(new_tile)
         elif direction == Direction.UP:
             for c in range(self.cols):
                 col = [state[r][c] for r in range(self.rows)]
-                new_col, moved = self.merge_tiles_left(col)
+                new_col, moved, new_tile = self.merge_tiles_left(col)
                 for r in range(self.rows):
                     state[r][c] = new_col[r]
                 moved_any = moved_any or moved
+                new_tiles.extend(new_tile)
         elif direction == Direction.DOWN:
             for c in range(self.cols):
                 col = [state[r][c] for r in range(self.rows)][::-1]
-                new_rev_col, moved = self.merge_tiles_left(col)
+                new_rev_col, moved, new_tile = self.merge_tiles_left(col)
                 new_col = new_rev_col[::-1]
                 for r in range(self.rows):
                     state[r][c] = new_col[r]
                 moved_any = moved_any or moved
+                new_tiles.extend(new_tile)
         else:
-            return True, self.state
+            return True, self.state, new_tiles
         if not moved_any:
             if not self.can_move():
-                return False, self.state
-            return True, self.state
+                return False, self.state, new_tiles
+            return True, self.state, new_tiles
         self.state = tuple(tuple(row) for row in state)
         self.state = self.generate_tile()
-        return True, self.state
+        return True, self.state, new_tiles
 
     def get_state(self):
         return self.state
@@ -275,15 +282,17 @@ if __name__ == "__main__":
                 pygame.quit()
                 exit()
             elif event.type == pygame.KEYDOWN:
+                merged_new_tiles = []
                 if event.key == pygame.K_UP:
-                    run, _ = game.next_state(Direction.UP)
+                    run, _, merged_new_tiles = game.next_state(Direction.UP)
                 elif event.key == pygame.K_DOWN:
-                    run, _ = game.next_state(Direction.DOWN)
+                    run, _, merged_new_tiles = game.next_state(Direction.DOWN)
                 elif event.key == pygame.K_RIGHT:
-                    run, _ = game.next_state(Direction.RIGHT)
+                    run, _, merged_new_tiles = game.next_state(Direction.RIGHT)
                 elif event.key == pygame.K_LEFT:
-                    run, _ = game.next_state(Direction.LEFT)
+                    run, _, merged_new_tiles = game.next_state(Direction.LEFT)
                 game.graphics.update_tiles(game.state)
+                logging.debug(f"Merged new tiles: {merged_new_tiles}")
     logging.info(f"Game over! Highest tile: {2**game.get_highest_tile()}")
     logging.info("Press SPACE to exit.")
     while True:
