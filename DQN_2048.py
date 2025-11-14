@@ -1,3 +1,4 @@
+from curses import window
 import time
 from stable_baselines3 import DQN
 from stable_baselines3.dqn.policies import DQNPolicy
@@ -205,8 +206,12 @@ def train_and_save_model():
     model.learn(total_timesteps=1_500_000, log_interval=4, callback=callback)
     model.save("dqn_2048_model")
     
+    def moving_average(x, window=20):
+        return np.convolve(x, np.ones(window)/window, mode='valid')
+
+    smoothed_rewards = moving_average(callback.rewards, window=20)
     plt.figure(figsize=(7,4))
-    plt.plot(callback.rewards)
+    plt.plot(smoothed_rewards)
     plt.xlabel("Episodes")
     plt.ylabel("Reward")
     plt.title("Average Reward per Episode")
